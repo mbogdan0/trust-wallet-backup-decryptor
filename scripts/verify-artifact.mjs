@@ -1,27 +1,19 @@
 import fs from 'node:fs/promises';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
-import {
-  ARTIFACT_PATH,
-  assertInlineScriptAllowedByCsp,
-  assertOfflineHtml,
-  assertParsableInlineScript,
-  sha256Hex
-} from './artifact-utils.mjs';
-
-const execFileAsync = promisify(execFile);
+import { buildArtifact } from '../build.mjs';
+import { ARTIFACT_PATH, assertArtifactHtml, sha256Hex } from './artifact-utils.mjs';
 
 async function buildAndHash() {
-  await execFileAsync(process.execPath, ['build.mjs'], {
-    cwd: process.cwd()
-  });
+  const { sha256: buildSha256 } = await buildArtifact();
 
   const html = await fs.readFile(ARTIFACT_PATH, 'utf8');
-  assertOfflineHtml(html);
-  assertInlineScriptAllowedByCsp(html);
-  assertParsableInlineScript(html);
+  assertArtifactHtml(html);
 
-  return sha256Hex(html);
+  const fileSha256 = sha256Hex(html);
+  if (fileSha256 !== buildSha256) {
+    throw new Error(`Artifact hash mismatch after build: ${fileSha256} != ${buildSha256}`);
+  }
+
+  return fileSha256;
 }
 
 const firstHash = await buildAndHash();

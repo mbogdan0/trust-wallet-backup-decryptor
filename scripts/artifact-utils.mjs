@@ -110,3 +110,9 @@ export function assertParsableInlineScript(html) {
   const script = extractInlineScript(html);
   new Function(script);
 }
+
+export function assertArtifactHtml(html) {
+  assertOfflineHtml(html);
+  assertInlineScriptAllowedByCsp(html);
+  assertParsableInlineScript(html);
+}

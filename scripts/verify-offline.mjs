@@ -1,12 +1,7 @@
 import fs from 'node:fs/promises';
-import {
-  ARTIFACT_PATH,
-  assertInlineScriptAllowedByCsp,
-  assertOfflineHtml
-} from './artifact-utils.mjs';
+import { ARTIFACT_PATH, assertArtifactHtml } from './artifact-utils.mjs';
 
 const html = await fs.readFile(ARTIFACT_PATH, 'utf8');
-assertOfflineHtml(html);
-assertInlineScriptAllowedByCsp(html);
+assertArtifactHtml(html);
 
 console.log('Offline invariant OK');

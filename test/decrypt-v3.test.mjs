@@ -66,6 +66,16 @@ test('decryptV3Raw rejects unsupported version', async () => {
   );
 });
 
+test('decryptV3Raw rejects missing crypto section', async () => {
+  const keystore = cloneDemoKeystore();
+  delete keystore.crypto;
+
+  await assert.rejects(
+    decryptV3Raw(JSON.stringify(keystore), DEMO_PASSWORD),
+    /Missing crypto section/
+  );
+});
+
 test('decryptV3Raw rejects unsupported kdf', async () => {
   const keystore = cloneDemoKeystore();
   keystore.crypto.kdf = 'pbkdf2';
@@ -86,13 +96,73 @@ test('decryptV3Raw rejects unsupported cipher', async () => {
   );
 });
 
+test('decryptV3Raw rejects missing kdfparams', async () => {
+  const keystore = cloneDemoKeystore();
+  delete keystore.crypto.kdfparams;
+
+  await assert.rejects(
+    decryptV3Raw(JSON.stringify(keystore), DEMO_PASSWORD),
+    /Missing kdfparams/
+  );
+});
+
+test('decryptV3Raw rejects missing cipherparams', async () => {
+  const keystore = cloneDemoKeystore();
+  delete keystore.crypto.cipherparams;
+
+  await assert.rejects(
+    decryptV3Raw(JSON.stringify(keystore), DEMO_PASSWORD),
+    /Missing cipherparams/
+  );
+});
+
 test('decryptV3Raw rejects invalid hex input', async () => {
   const keystore = cloneDemoKeystore();
   keystore.crypto.ciphertext = 'zz';
 
   await assert.rejects(
     decryptV3Raw(JSON.stringify(keystore), DEMO_PASSWORD),
-    /Invalid hex/
+    /Invalid ciphertext/
+  );
+});
+
+test('decryptV3Raw rejects invalid IV length', async () => {
+  const keystore = cloneDemoKeystore();
+  keystore.crypto.cipherparams.iv = '0102';
+
+  await assert.rejects(
+    decryptV3Raw(JSON.stringify(keystore), DEMO_PASSWORD),
+    /Invalid cipher IV/
+  );
+});
+
+test('decryptV3Raw rejects invalid MAC length', async () => {
+  const keystore = cloneDemoKeystore();
+  keystore.crypto.mac = '0011';
+
+  await assert.rejects(
+    decryptV3Raw(JSON.stringify(keystore), DEMO_PASSWORD),
+    /Invalid MAC/
+  );
+});
+
+test('decryptV3Raw rejects empty ciphertext', async () => {
+  const keystore = cloneDemoKeystore();
+  keystore.crypto.ciphertext = '';
+
+  await assert.rejects(
+    decryptV3Raw(JSON.stringify(keystore), DEMO_PASSWORD),
+    /Ciphertext is empty/
+  );
+});
+
+test('decryptV3Raw rejects empty salt', async () => {
+  const keystore = cloneDemoKeystore();
+  keystore.crypto.kdfparams.salt = '';
+
+  await assert.rejects(
+    decryptV3Raw(JSON.stringify(keystore), DEMO_PASSWORD),
+    /Invalid scrypt salt/
   );
 });
 

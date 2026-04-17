@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "check": "npm test && npm run build && npm run verify:offline && npm run verify:artifact",
+    "check": "npm test && npm run verify:artifact",
     "test": "node --test",
     "verify:offline": "node scripts/verify-offline.mjs",
     "verify:artifact": "node scripts/verify-artifact.mjs"
@@ -16,5 +16,6 @@
   },
   "devDependencies": {
     "esbuild": "^0.25.0"
-  }
+  },
+  "version": "1.0.1"
 }
