@@ -3,6 +3,7 @@ import {
   ALL_ARTIFACT_PATHS,
   ARTIFACT_FILE,
   PAGES_ARTIFACT_FILE,
+  assertInlineScriptAllowedByCsp,
   assertOfflineHtml
 } from './artifact-utils.mjs';
 
@@ -12,6 +13,8 @@ const [localHtml, pagesHtml] = await Promise.all(
 
 assertOfflineHtml(localHtml);
 assertOfflineHtml(pagesHtml);
+assertInlineScriptAllowedByCsp(localHtml);
+assertInlineScriptAllowedByCsp(pagesHtml);
 
 if (localHtml !== pagesHtml) {
   throw new Error(`${ARTIFACT_FILE} and ${PAGES_ARTIFACT_FILE} differ`);

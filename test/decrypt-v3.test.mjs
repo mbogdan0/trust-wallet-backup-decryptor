@@ -23,6 +23,28 @@ test('decryptV3Raw decrypts the known demo vector', async () => {
   assert.equal(Buffer.from(result.plaintext).toString('hex'), DEMO_EXPECTED.hex);
 });
 
+test('decryptV3Raw accepts Trust Wallet style metadata outside the crypto section', async () => {
+  const keystore = cloneDemoKeystore();
+  keystore.name = 'Recovered wallet';
+  keystore.type = 'private-key';
+  keystore.activeAccounts = [
+    {
+      address: '0x0000000000000000000000000000000000000001',
+      coin: 60,
+      derivationPath: "m/44'/60'/0'/0/1"
+    }
+  ];
+  keystore.extraMetadata = {
+    source: 'trust-wallet-demo',
+    notes: 'metadata outside crypto must not affect decryption'
+  };
+
+  const result = await decryptV3Raw(JSON.stringify(keystore), DEMO_PASSWORD);
+
+  assert.equal(result.utf8, DEMO_EXPECTED.utf8);
+  assert.equal(result.hex, DEMO_EXPECTED.hex);
+});
+
 test('decryptV3Raw rejects a wrong password', async () => {
   await assert.rejects(
     decryptV3Raw(DEMO_KEYSTORE_JSON, 'wrong-password'),

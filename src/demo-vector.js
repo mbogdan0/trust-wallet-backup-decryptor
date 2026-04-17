@@ -1,8 +1,17 @@
 export const DEMO_PASSWORD = 'test-password';
 
 export const DEMO_KEYSTORE_OBJECT = Object.freeze({
+  activeAccounts: [
+    {
+      address: '0x219D5b85644457E7bfD42670c545c89c22E2840F',
+      coin: 60,
+      derivationPath: "m/44'/60'/0'/0/0"
+    }
+  ],
   version: 3,
   id: '00000000-0000-4000-8000-000000000001',
+  name: 'Demo wallet',
+  type: 'private-key',
   crypto: {
     ciphertext: '7fae29ecab1abfbfd9dbdf48b5bbc7e6ec421e0f83',
     cipherparams: {

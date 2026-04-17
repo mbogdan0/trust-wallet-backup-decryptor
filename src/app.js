@@ -38,6 +38,10 @@ function formatResult(result) {
   ].join('\n');
 }
 
+function formatErrorMessage(error) {
+  return error instanceof Error ? error.message : 'Unknown error';
+}
+
 function mount() {
   document.title = 'Trust Wallet Backup Decryptor';
   setStyles(document.body, {
@@ -65,7 +69,7 @@ function mount() {
   });
 
   const description = createNode('p', {
-    text: 'Local browser-based tool for decrypting Trust Wallet backup files stored as Web3 Secret Storage v3.',
+    text: 'Local browser-based tool for decrypting Trust Wallet backup JSON and compatible Web3 Secret Storage v3 keystore files.',
     styles: {
       margin: '0 0 12px',
       fontSize: '15px',
@@ -76,7 +80,7 @@ function mount() {
   });
 
   const helper = createNode('p', {
-    text: `Demo vector password: ${DEMO_PASSWORD}`,
+    text: `Built-in demo JSON password: ${DEMO_PASSWORD}`,
     styles: {
       margin: '0 0 24px',
       fontSize: '14px',
@@ -95,7 +99,7 @@ function mount() {
   });
 
   const jsonLabel = createNode('label', {
-    text: 'Keystore JSON',
+    text: 'Backup JSON',
     attrs: { for: 'json-input' },
     styles: {
       fontWeight: '600'
@@ -203,9 +207,15 @@ function mount() {
 
     try {
       const result = await decryptV3Raw(jsonInput.value, passwordInput.value);
-      output.textContent = formatResult(result);
+      try {
+        output.textContent = formatResult(result);
+      } finally {
+        if (result.plaintext instanceof Uint8Array) {
+          result.plaintext.fill(0);
+        }
+      }
     } catch (error) {
-      output.textContent = `Decrypt failed: ${error.message}`;
+      output.textContent = `Decrypt failed: ${formatErrorMessage(error)}`;
     } finally {
       passwordInput.value = '';
       button.disabled = false;

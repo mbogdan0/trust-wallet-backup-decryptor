@@ -5,6 +5,7 @@ import {
   ARTIFACT_PATH,
   PAGES_ARTIFACT_FILE,
   PAGES_ARTIFACT_PATH,
+  assertInlineScriptAllowedByCsp,
   assertOfflineHtml,
   assertParsableInlineScript,
   sha256Hex
@@ -24,6 +25,8 @@ async function buildAndHash() {
 
   assertOfflineHtml(html);
   assertOfflineHtml(pagesHtml);
+  assertInlineScriptAllowedByCsp(html);
+  assertInlineScriptAllowedByCsp(pagesHtml);
   assertParsableInlineScript(html);
   assertParsableInlineScript(pagesHtml);
 

@@ -12,7 +12,7 @@ const MAX_SCRYPT_CPU_COST = 16_777_216;
 
 const HEX_RE = /^[0-9a-f]+$/i;
 const encoder = new TextEncoder();
-const decoder = new TextDecoder();
+const decoder = new TextDecoder('utf-8', { fatal: true });
 const { scrypt } = scryptJs;
 
 function assert(condition, message) {

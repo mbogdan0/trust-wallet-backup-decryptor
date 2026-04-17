@@ -35,6 +35,10 @@ export function sha256Hex(content) {
   return crypto.createHash('sha256').update(content).digest('hex');
 }
 
+export function sha256Base64(content) {
+  return crypto.createHash('sha256').update(content).digest('base64');
+}
+
 export function extractInlineScript(html) {
   const matches = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
 
@@ -47,7 +51,51 @@ export function extractInlineScript(html) {
     throw new Error('Inline script must not use src=');
   }
 
-  return scriptContent.trim();
+  return scriptContent;
+}
+
+export function extractCspMetaContent(html) {
+  const metaTags = [...html.matchAll(/<meta\b([^>]*)>/gi)];
+
+  for (const [, attributes] of metaTags) {
+    if (!/\bhttp-equiv\s*=\s*(["'])Content-Security-Policy\1/i.test(attributes)) {
+      continue;
+    }
+
+    const contentMatch = attributes.match(/\bcontent\s*=\s*(["'])([\s\S]*?)\1/i);
+    if (!contentMatch) {
+      throw new Error('Content-Security-Policy meta tag is missing content=');
+    }
+
+    return contentMatch[2];
+  }
+
+  throw new Error('Content-Security-Policy meta tag not found');
+}
+
+export function assertInlineScriptAllowedByCsp(html) {
+  const script = extractInlineScript(html);
+  const csp = extractCspMetaContent(html);
+  const directives = csp
+    .split(';')
+    .map(directive => directive.trim())
+    .filter(Boolean);
+  const scriptDirective = directives.find(directive => directive.toLowerCase().startsWith('script-src '));
+
+  if (!scriptDirective) {
+    throw new Error('Content-Security-Policy is missing script-src');
+  }
+
+  const sources = scriptDirective.split(/\s+/).slice(1);
+  const expectedSource = `'sha256-${sha256Base64(script)}'`;
+
+  if (sources.includes("'unsafe-inline'")) {
+    throw new Error("script-src must not include 'unsafe-inline'");
+  }
+
+  if (!sources.includes(expectedSource)) {
+    throw new Error(`script-src does not allow the inline script via ${expectedSource}`);
+  }
 }
 
 export function assertOfflineHtml(html) {
