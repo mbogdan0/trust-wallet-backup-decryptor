@@ -2,8 +2,11 @@ import { build } from 'esbuild';
 import fs from 'node:fs/promises';
 
 import {
+  ARTIFACT_DIR,
   ARTIFACT_FILE,
   ARTIFACT_PATH,
+  PAGES_ARTIFACT_FILE,
+  PAGES_ARTIFACT_PATH,
   STALE_ARTIFACT_FILES,
   assertOfflineHtml,
   assertParsableInlineScript,
@@ -23,7 +26,7 @@ const result = await build({
 const js = result.outputFiles[0].text;
 
 const html = `<!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -38,10 +41,14 @@ const html = `<!doctype html>
 assertOfflineHtml(html);
 assertParsableInlineScript(html);
 
-await fs.mkdir(new URL('./dist/', import.meta.url), { recursive: true });
-await fs.writeFile(ARTIFACT_PATH, html, 'utf8');
+await fs.mkdir(ARTIFACT_DIR, { recursive: true });
+await Promise.all([
+  fs.writeFile(ARTIFACT_PATH, html, 'utf8'),
+  fs.writeFile(PAGES_ARTIFACT_PATH, html, 'utf8')
+]);
 await Promise.all(STALE_ARTIFACT_FILES.map(file => fs.rm(file, { force: true })));
 
 const sha256 = sha256Hex(html);
 console.log(`Built: ${ARTIFACT_FILE}`);
+console.log(`Built: ${PAGES_ARTIFACT_FILE}`);
 console.log(`SHA-256: ${sha256}`);

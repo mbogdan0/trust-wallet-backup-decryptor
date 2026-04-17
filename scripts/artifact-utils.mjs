@@ -8,6 +8,9 @@ const DIST_DIR = join(ROOT_DIR, 'dist');
 export const ARTIFACT_FILE = 'trust-wallet-backup-decryptor.html';
 export const ARTIFACT_DIR = DIST_DIR;
 export const ARTIFACT_PATH = join(ARTIFACT_DIR, ARTIFACT_FILE);
+export const PAGES_ARTIFACT_FILE = 'index.html';
+export const PAGES_ARTIFACT_PATH = join(ARTIFACT_DIR, PAGES_ARTIFACT_FILE);
+export const ALL_ARTIFACT_PATHS = [ARTIFACT_PATH, PAGES_ARTIFACT_PATH];
 export const STALE_ARTIFACT_FILES = [
   join(ROOT_DIR, 'index.html'),
   join(ROOT_DIR, 'keystore-v3-decryptor.html')

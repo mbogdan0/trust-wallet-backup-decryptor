@@ -16,7 +16,10 @@ npm install
 npm run build
 ```
 
-The generated HTML artifact is written to `dist/trust-wallet-backup-decryptor.html`.
+The build writes two equivalent HTML files:
+
+- `dist/trust-wallet-backup-decryptor.html` for local offline use
+- `dist/index.html` for GitHub Pages root deployment
 
 ## Usage
 
@@ -32,6 +35,13 @@ The generated HTML artifact is written to `dist/trust-wallet-backup-decryptor.ht
 - `npm test` runs the decryption and error-handling tests.
 - `npm run verify:offline` checks that the final HTML does not use network APIs or external resources.
 - `npm run verify:artifact` checks that repeated builds are reproducible.
+
+## GitHub Pages Demo
+
+- Pushes to `main` trigger a GitHub Actions workflow that runs `npm run check`, builds the site, and deploys the demo to GitHub Pages.
+- GitHub Pages serves `dist/index.html`, so the demo opens at the site root.
+- The Pages site is a public demo for the interface and safe built-in demo vector only.
+- For real sensitive Trust Wallet backups, use the locally built `dist/trust-wallet-backup-decryptor.html` instead of the public Pages URL.
 
 ## Limitations
 
