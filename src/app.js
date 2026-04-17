@@ -1,6 +1,10 @@
 import { decryptV3Raw } from './decrypt-v3.js';
 import { DEMO_KEYSTORE_JSON, DEMO_PASSWORD } from './demo-vector.js';
 
+const DEMO_BANNER_HOSTNAMES = new Set(['mbogdan0.github.io', 'www.mbogdan0.github.io']);
+const DEMO_BANNER_TEXT =
+  '⚠️ Demo mode — using real backups here is not recommended. For sensitive data, prefer a local build.';
+
 function setStyles(node, styles) {
   Object.assign(node.style, styles);
   return node;
@@ -42,6 +46,30 @@ function formatErrorMessage(error) {
   return error instanceof Error ? error.message : 'Unknown error';
 }
 
+function shouldShowDemoBanner() {
+  return DEMO_BANNER_HOSTNAMES.has(window.location.hostname.toLowerCase());
+}
+
+function createDemoBanner() {
+  return createNode('div', {
+    text: DEMO_BANNER_TEXT,
+    attrs: {
+      role: 'status'
+    },
+    styles: {
+      margin: '0 0 18px',
+      padding: '10px 14px',
+      borderRadius: '10px',
+      border: '1px solid #d4c47a',
+      backgroundColor: '#f7f1cf',
+      color: '#5f4d16',
+      fontSize: '14px',
+      lineHeight: '1.45',
+      fontWeight: '500'
+    }
+  });
+}
+
 function mount() {
   document.title = 'Trust Wallet Backup Decryptor';
   setStyles(document.body, {
@@ -58,6 +86,10 @@ function mount() {
       padding: '32px 18px 48px'
     }
   });
+
+  if (shouldShowDemoBanner()) {
+    container.append(createDemoBanner());
+  }
 
   const heading = createNode('h1', {
     text: 'Trust Wallet backup decryptor',
