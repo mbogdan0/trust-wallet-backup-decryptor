@@ -1,27 +1,76 @@
 # Trust Wallet Backup Decryptor
 
-Local offline tool for decrypting Trust Wallet backup JSON and compatible Web3 Secret Storage v3 keystore files directly in the browser.
+Local offline tool for decrypting a Trust Wallet backup file in the browser to recover its plaintext payload, most often a seed phrase. It also accepts compatible Web3 Secret Storage v3 / Wallet Core-style JSON.
+
+## Live Demo
+
+**[Open the example demo](https://mbogdan0.github.io/trust-wallet-backup-decryptor/)**
+
+The public GitHub Pages site is only for the safe built-in example JSON. For any real sensitive backup file, build locally and open `dist/index.html` on a trusted machine.
 
 ## What This Project Is For
 
-- Accepts a Trust Wallet backup JSON or compatible keystore JSON plus its password.
+- Accepts a Trust Wallet backup JSON plus its password.
 - Decrypts the protected payload entirely in the browser on your local machine.
-- Shows the decrypted payload as `HEX`, `UTF-8`, and `Base64`.
+- Shows the decrypted payload as `UTF-8`, `HEX`, and `Base64`.
 - Makes no HTTP requests and does not require a server.
 
-Trust Wallet's normal consumer backup guidance focuses on manually writing down the recovery phrase inside the app. This repository is for the separate encrypted JSON backup or keystore case: a JSON object with a Web3 Secret Storage v3-style `crypto` section and optional wallet metadata such as `id`, `name`, `type`, or `activeAccounts`.
+Trust Wallet's normal consumer backup guidance focuses on viewing, writing down, and restoring the recovery phrase inside the app:
 
-In other words, if you have the encrypted backup JSON and its password, this tool lets you decrypt that payload locally without opening the Trust Wallet app itself.
+- [Encrypted Cloud Backup guidance](https://support.trustwallet.com/support/solutions/articles/67000734541-best-practices-for-recovery-phrase-storage)
+- [How to back up your recovery phrase](https://support.trustwallet.com/support/solutions/articles/67000748490-how-to-backup-your-recovery-phrase-in-trust-wallet)
+- [Import a wallet via secret phrase](https://support.trustwallet.com/support/solutions/articles/67000731384-import-a-wallet-via-secret-phrase)
 
-## What This Backup JSON Usually Looks Like
+This repository covers the separate encrypted backup file case: if you already have the backup JSON and its password, you can decrypt it locally without opening Trust Wallet itself. The decryptor also accepts compatible Web3 Secret Storage `version: 3` / Wallet Core-style JSON objects with a `crypto` section and optional metadata such as `id`, `name`, or `activeAccounts`.
 
-The input this tool expects is a JSON object that includes:
+## Example Backup JSON
 
-- `version: 3`
-- a `crypto` object with `ciphertext`, `cipherparams.iv`, `kdf`, `kdfparams`, and `mac`
-- optional metadata around the `crypto` section such as `id`, `name`, `type`, `address`, or `activeAccounts`
+Safe built-in demo password:
 
-This matches the Web3 Secret Storage v3 / stored-key style structure used by Trust Wallet Core-style JSON exports. The decryptor intentionally ignores metadata outside the `crypto` section and only uses the fields required to derive the key, verify the MAC, and decrypt the ciphertext.
+```text
+test-password
+```
+
+Safe built-in demo JSON:
+
+```json
+{
+  "version": 3,
+  "id": "00000000-0000-4000-8000-000000000001",
+  "name": "Demo wallet",
+  "crypto": {
+    "ciphertext": "61a52dbeb50fecbb91d6c955bfe994e5fd550a0eec7767a11a84e306c46439b8d83d05bc069e488076043bc364e5610ba1fa56597e778b4454a0508d3a6338b6e26b8aa608b8403ecda1b9",
+    "cipherparams": {
+      "iv": "0102030405060708090a0b0c0d0e0f10"
+    },
+    "cipher": "aes-128-ctr",
+    "kdf": "scrypt",
+    "kdfparams": {
+      "dklen": 32,
+      "n": 16384,
+      "r": 8,
+      "p": 1,
+      "salt": "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"
+    },
+    "mac": "ebf4ac503ef49ddb5d216e4f5cf2dafa1c272d43dab3bd789a81d96340f7cc61"
+  },
+  "activeAccounts": [
+    {
+      "address": "0x219D5b85644457E7bfD42670c545c89c22E2840F",
+      "coin": 60,
+      "derivationPath": "m/44'/60'/0'/0/0"
+    }
+  ]
+}
+```
+
+With the correct password, the `UTF-8` output is:
+
+```text
+infant whisper frequent general marble chapter sun dog duck ocean cake hunt
+```
+
+The decryptor intentionally ignores metadata outside `crypto` and only uses the fields required to derive the key, verify the MAC, and decrypt the ciphertext.
 
 ## Build
 
@@ -38,15 +87,12 @@ If you only want the artifact:
 npm run build
 ```
 
-The build writes two equivalent HTML files:
-
-- `dist/trust-wallet-backup-decryptor.html` for local offline use
-- `dist/index.html` for GitHub Pages root deployment
+`npm run build` writes one offline artifact: `dist/index.html`.
 
 ## Local Usage
 
 1. Build the project with `npm run check` or `npm run build`.
-2. Open `dist/trust-wallet-backup-decryptor.html` directly in your browser.
+2. Open `dist/index.html` directly in your browser.
 3. Paste the Trust Wallet backup JSON.
 4. Enter the password used to protect the backup.
 5. Click `Decrypt`.
@@ -64,11 +110,10 @@ This tool decrypts the payload. It does not claim that every Trust Wallet backup
 
 ## GitHub Pages Demo
 
-- Preview URL: [https://mbogdan0.github.io/trust-wallet-backup-decryptor/](https://mbogdan0.github.io/trust-wallet-backup-decryptor/)
 - Pushes to `main` trigger a GitHub Actions workflow that runs `npm run check`, builds the site, and deploys the demo to GitHub Pages.
 - GitHub Pages serves `dist/index.html`, so the demo opens at the site root.
-- The Pages site is a public demo for the interface and safe built-in demo vector only.
-- For real sensitive Trust Wallet backups, use the locally built `dist/trust-wallet-backup-decryptor.html` instead of the public Pages URL.
+- The Pages site is a public demo for the interface and safe built-in example data only.
+- For real sensitive Trust Wallet backups, use the locally built `dist/index.html` instead of the public Pages URL.
 
 ## Validation and Safety Checks
 
@@ -85,14 +130,8 @@ The generated HTML also ships with a restrictive Content Security Policy and the
 - Supports `scrypt` as the KDF.
 - Supports `aes-128-ctr` as the cipher.
 - Decrypts the protected payload only; it does not derive addresses, validate BIP-39 mnemonics, or reconstruct the full Trust Wallet state.
+- Not every compatible backup or keystore necessarily decrypts to a mnemonic; the plaintext may be a recovery phrase, a private key, or another wallet secret representation.
 - This is a local utility for manual recovery from encrypted backup JSON, not a hosted service or general wallet replacement.
-
-## Before Uploading to GitHub
-
-- `dist/` is intentionally ignored because it contains generated build artifacts.
-- `.idea/` and `*.iml` are intentionally ignored because they are local IDE files.
-- Do not upload real Trust Wallet backup files.
-- Do not store real passwords in source files, tests, notes, or commit history.
 
 ## Safety Notes
 

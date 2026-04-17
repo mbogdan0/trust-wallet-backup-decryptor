@@ -3,8 +3,6 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import {
   ARTIFACT_PATH,
-  PAGES_ARTIFACT_FILE,
-  PAGES_ARTIFACT_PATH,
   assertInlineScriptAllowedByCsp,
   assertOfflineHtml,
   assertParsableInlineScript,
@@ -18,21 +16,10 @@ async function buildAndHash() {
     cwd: process.cwd()
   });
 
-  const [html, pagesHtml] = await Promise.all([
-    fs.readFile(ARTIFACT_PATH, 'utf8'),
-    fs.readFile(PAGES_ARTIFACT_PATH, 'utf8')
-  ]);
-
+  const html = await fs.readFile(ARTIFACT_PATH, 'utf8');
   assertOfflineHtml(html);
-  assertOfflineHtml(pagesHtml);
   assertInlineScriptAllowedByCsp(html);
-  assertInlineScriptAllowedByCsp(pagesHtml);
   assertParsableInlineScript(html);
-  assertParsableInlineScript(pagesHtml);
-
-  if (html !== pagesHtml) {
-    throw new Error(`${PAGES_ARTIFACT_FILE} does not match the canonical local artifact`);
-  }
 
   return sha256Hex(html);
 }

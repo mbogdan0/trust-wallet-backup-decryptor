@@ -69,7 +69,7 @@ function mount() {
   });
 
   const description = createNode('p', {
-    text: 'Local browser-based tool for decrypting Trust Wallet backup JSON and compatible Web3 Secret Storage v3 keystore files.',
+    text: 'Local browser-based tool for decrypting a Trust Wallet backup JSON and revealing its plaintext payload, often a recovery phrase.',
     styles: {
       margin: '0 0 12px',
       fontSize: '15px',
