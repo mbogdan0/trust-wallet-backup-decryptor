@@ -148,7 +148,6 @@ function normalizeKeystoreV3(jsonText) {
   assertObject(cryptoSection.cipherparams, 'Missing cipherparams');
 
   const salt = hexToBytes(cryptoSection.kdfparams.salt, { errorMessage: 'Invalid scrypt salt' });
-  assert(salt.length > 0, 'Invalid scrypt salt');
 
   const iv = hexToBytes(cryptoSection.cipherparams.iv, {
     errorMessage: 'Invalid cipher IV',

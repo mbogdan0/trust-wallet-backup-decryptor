@@ -44,13 +44,14 @@ Offline browser tool to decrypt a Trust Wallet backup JSON (Web3 Secret Storage 
     "cipherparams": { "iv": "<16-byte hex>" },
     "cipher": "aes-128-ctr",
     "kdf": "scrypt",
-    "kdfparams": { "n": 16384, "r": 8, "p": 1, "dklen": 32, "salt": "<hex>" },
+    "kdfparams": { "n": 16384, "r": 8, "p": 1, "dklen": 32, "salt": "<hex or empty>" },
     "mac": "<32-byte hex>"
   }
 }
 ```
 
 - JSON input size limit: 1 MiB.
+- `kdfparams.salt: ""` is accepted for legacy compatibility with some backups.
 - Decrypts payload bytes only (no address derivation or mnemonic validation).
 
 ## What Is Used
